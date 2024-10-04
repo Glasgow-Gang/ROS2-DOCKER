@@ -116,10 +116,10 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Get docker image
-      run:  docker pull ghcr.io/xrobot-org/docker-image:main
+      run:  docker pull ghcr.io/glasgow-gang/ros2-docker:main
 
     - name: Rename docker image
-      run:  docker tag ghcr.io/xrobot-org/docker-image:main xrimage/build
+      run:  docker tag ghcr.io/glasgow-gang/ros2-docker:main lconlcong/ros2_nao6
 
     - name: upload file
-      run: docker images && docker push xrimage/build
+      run: docker images && docker push lconlcong/ros2_nao6
