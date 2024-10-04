@@ -1,35 +1,10 @@
-ARG ROS_DISTRO=iron
-FROM ros:${ROS_DISTRO} as dev
-ENV ROS_DISTRO=${ROS_DISTRO}
-ENV DEBIAN_FRONTEND=noninteractive
-SHELL ["/bin/bash", "-c"]
+FROM osrf/ros:humble-desktop
 
-# Create Colcon workspace with the project and its deps
-ENV WS=/ws
-ENV PROJ_SRC=${WS}/src/naoqi_driver
-COPY . $PROJ_SRC
-WORKDIR $WS/src
-RUN apt install -y git python3-vcstool
-RUN vcs import < $PROJ_SRC/dependencies.repos
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Build the base Colcon workspace, installing dependencies first.
-WORKDIR $WS
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash \
-  && apt-get update -y \
-  && rosdep update \
-  && rosdep install --from-paths src --ignore-src --rosdistro ${ROS_DISTRO} -y
+LABEL maintainer="3055752L@student.gla.ac.uk"
+LABEL description="This is a Docker Image for ROS2 build."
 
-# Install extra tools for development
-RUN apt-get update && apt-get install -y --no-install-recommends \
- gdb gdbserver nano libgmock-dev
+RUN apt update
 
-# Expect to mount the source code from the host.
-VOLUME $PROJ_SRC
-
-# Every bash instance should source the entrypoint
-RUN echo "source ${PROJ_SRC}/docker/entrypoint.sh" >> /root/.bashrc
-SHELL [ "/bin/bash", "-c" ]
-ENTRYPOINT [ "/bin/bash" ]
-
-FROM dev as dev-prebuilt
-RUN colcon build --symlink-install
+RUN apt upgrade -y --no-install-recommends && apt install -y --no-install-recommends git curl sudo wget zip make net-tools nano gdb cmake ninja-build gcc g++ python3-tk python3-pip ros-humble-naoqi-libqi ros-humble-naoqi-libqicore ros-humble-naoqi-bridge-msgs ros-humble-pepper-meshes ros-humble-nao-meshes rviz && apt clean
